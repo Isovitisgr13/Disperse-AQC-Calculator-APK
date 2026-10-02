@@ -1,0 +1,47 @@
+name: Build iPhone IPA
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check calculation engine
+        run: npm test
+
+      - name: Generate iOS project
+        run: |
+          npx cap add ios --packagemanager SPM
+          npx capacitor-assets generate --ios --iconBackgroundColor '#0A6A74' --splashBackgroundColor '#0A6A74'
+          npx cap sync ios
+
+      # Unsigned build: the IPA is signed with your own Apple ID when you install it
+      # (Sideloadly or AltStore), so no certificates are needed here.
+      - name: Build app
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+
+      - name: Package IPA
+        run: |
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qry AQC-Calculator.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AQC-Calculator-ipa
+          path: AQC-Calculator.ipa
