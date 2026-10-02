@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A6A74">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AQC Calc">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- page:start -->
+<title>Aquachron Wash-Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #ECF0F2;
+  --surface: #FFFFFF;
+  --surface-2: #F5F8F9;
+  --ink: #13232B;
+  --muted: #5A6C75;
+  --line: #D2DCE0;
+  --accent: #0A6A74;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #DCEEF0;
+  --heat: #B04A1A;
+  --heat-soft: #F8E6DC;
+  --dye: #22357A;
+  --dye-soft: #E1E5F4;
+  --caustic: #8A6A10;
+  --ok: #2B7A4B;
+  --ok-soft: #DDF0E4;
+  --warn: #9A5B00;
+  --warn-soft: #FBEBCF;
+  --shadow: 0 1px 2px rgba(19,35,43,.06), 0 4px 16px rgba(19,35,43,.05);
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0D1519; --surface: #141F25; --surface-2: #19262D; --ink: #E3ECEF; --muted: #93A6AE;
+    --line: #26363E; --accent: #4CC0CB; --accent-ink: #062226; --accent-soft: #123A40;
+    --heat: #F08A5A; --heat-soft: #3A2217; --dye: #9DAEF0; --dye-soft: #1E2748; --caustic: #E0BE5C;
+    --ok: #6FD196; --ok-soft: #173427; --warn: #F2B65A; --warn-soft: #3A2A10;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0D1519; --surface: #141F25; --surface-2: #19262D; --ink: #E3ECEF; --muted: #93A6AE;
+  --line: #26363E; --accent: #4CC0CB; --accent-ink: #062226; --accent-soft: #123A40;
+  --heat: #F08A5A; --heat-soft: #3A2217; --dye: #9DAEF0; --dye-soft: #1E2748; --caustic: #E0BE5C;
+  --ok: #6FD196; --ok-soft: #173427; --warn: #F2B65A; --warn-soft: #3A2A10;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.5 var(--sans);
+  padding: 0 max(16px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(16px, env(safe-area-inset-left));
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 48px; display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font: 600 12px/1 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+
+/* Header */
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+header.top h1 { font-size: clamp(30px, 5vw, 42px); line-height: 1; }
+header.top h1 span { color: var(--accent); }
+header.top p { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
+.machine-tag { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { font: 500 12px/1 var(--mono); padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); white-space: nowrap; }
+
+/* Layout */
+.layout { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 980px) {
+  .layout { grid-template-columns: 340px minmax(0, 1fr); }
+  aside.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); max-height: calc(100vh - 32px); overflow: auto; }
+}
+
+/* Input panel */
+aside.panel > * { min-width: 0; }
+aside.panel { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 18px; display: grid; gap: 18px; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.panel-head h2 { font-size: 22px; }
+.field { display: grid; gap: 6px; }
+.field > label, .field > .label { font-weight: 500; font-size: 14px; display: flex; justify-content: space-between; gap: 8px; }
+.field .hint { font-size: 12px; color: var(--muted); font-weight: 400; }
+.input-unit { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); overflow: hidden; }
+.input-unit:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.input-unit input { flex: 1; width: 100%; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 16px/1 var(--mono); padding: 10px 10px; outline: none; }
+.input-unit .unit { display: grid; place-items: center; padding: 0 10px; font: 500 12px var(--mono); color: var(--muted); border-left: 1px solid var(--line); min-width: 56px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+.seg button { border: 0; background: transparent; color: var(--ink); font: 500 14px var(--sans); padding: 9px 8px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button:focus-visible, .btn:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.shade-field { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; }
+.shade-top { display: flex; align-items: center; gap: 12px; }
+.swatch { width: 44px; height: 44px; border-radius: 8px; border: 1px solid var(--line); flex: none; background: #fff; }
+.shade-top .input-unit { flex: 1; background: var(--surface); }
+/* Shade slider: zones, ticks and labels share one inset so they sit exactly under the thumb centre */
+.slider { --thumb: 20px; position: relative; padding-bottom: 20px; }
+.slider .zones, .slider .ticks { position: absolute; left: calc(var(--thumb) / 2); right: calc(var(--thumb) / 2); }
+.slider .zones { top: 7px; height: 6px; border-radius: 3px; overflow: hidden; display: flex; pointer-events: none; }
+.slider .zones span { height: 100%; }
+.slider .zones .z0 { background: var(--accent-soft); flex: 20; }
+.slider .zones .z1 { background: var(--heat-soft); flex: 30; }
+.slider .zones .z2 { background: color-mix(in srgb, var(--heat) 35%, var(--heat-soft)); flex: 25; }
+.slider .zones .z3 { background: color-mix(in srgb, var(--heat) 65%, var(--heat-soft)); flex: 25; }
+.slider .ticks { top: 16px; height: 20px; pointer-events: none; }
+.slider .ticks span { position: absolute; transform: translateX(-50%); font: 11px/1 var(--mono); color: var(--muted); padding-top: 6px; white-space: nowrap; }
+.slider .ticks span::before { content: ""; position: absolute; left: 50%; top: 0; width: 1px; height: 4px; background: var(--muted); }
+.slider .ticks span:first-child { transform: none; }
+.slider .ticks span:first-child::before { left: 0; }
+.slider .ticks span:last-child { transform: translateX(-100%); }
+.slider .ticks span:last-child::before { left: auto; right: 0; }
+.slider input[type="range"] { position: relative; display: block; width: 100%; height: var(--thumb); margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.slider input[type="range"]::-webkit-slider-runnable-track { height: var(--thumb); background: transparent; }
+.slider input[type="range"]::-moz-range-track { height: var(--thumb); background: transparent; }
+.slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: var(--thumb); height: var(--thumb); border-radius: 50%; background: var(--surface); border: 4px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.slider input[type="range"]::-moz-range-thumb { width: var(--thumb); height: var(--thumb); box-sizing: border-box; border-radius: 50%; background: var(--surface); border: 4px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.slider input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+.band-line { font-size: 13px; color: var(--muted); }
+.band-line b { color: var(--ink); font-weight: 600; }
+
+details.adv { border-top: 1px solid var(--line); padding-top: 12px; }
+details.adv > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
+details.adv > summary::-webkit-details-marker { display: none; }
+details.adv > summary::after { content: "+"; font: 500 18px var(--mono); color: var(--muted); }
+details.adv[open] > summary::after { content: "−"; }
+details.adv > summary .hint { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: auto; margin-right: 10px; }
+.adv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.adv-grid .field.wide { grid-column: 1 / -1; }
+.adv-grid .field > label { font-size: 13px; }
+.adv-grid .input-unit input { font-size: 14px; padding: 8px; }
+.adv-grid .input-unit .unit { min-width: 44px; font-size: 11px; padding: 0 6px; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 8px; padding: 7px 12px; font: 500 13px var(--sans); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+
+/* Results */
+main.results { display: grid; gap: 20px; min-width: 0; }
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 18px; display: grid; gap: 16px; }
+.summary-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.pill { font: 600 13px/1 var(--sans); letter-spacing: .04em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; }
+.pill.rc { background: var(--heat-soft); color: var(--heat); }
+.pill.rinse { background: var(--accent-soft); color: var(--accent); }
+.summary-head .desc { color: var(--muted); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--surface); padding: 12px 14px; display: grid; gap: 4px; }
+.kpi .v { font: 600 clamp(24px, 3.4vw, 32px)/1 var(--display); font-variant-numeric: tabular-nums; }
+.kpi .v small { font: 500 13px var(--mono); color: var(--muted); margin-left: 3px; }
+.kpi .s { font-size: 12px; color: var(--muted); }
+
+.warns { display: grid; gap: 8px; }
+.warn { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 9px 12px; font-size: 14px; }
+
+/* Steps */
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.section-head h2 { font-size: 26px; }
+.section-head p { margin: 0; color: var(--muted); font-size: 14px; }
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: step; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); display: grid; grid-template-columns: 56px minmax(0, 1fr); overflow: hidden; }
+.step-no { display: grid; align-content: start; justify-items: center; padding-top: 16px; font: 700 30px/1 var(--display); color: var(--accent); background: var(--surface-2); border-right: 1px solid var(--line); }
+.step-body { padding: 14px 16px 16px; display: grid; gap: 12px; }
+.step-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.step-title h3 { font-size: 22px; }
+.chip { font: 500 12px/1 var(--mono); padding: 5px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.heat { background: var(--heat-soft); color: var(--heat); border-color: transparent; }
+.chip.dye { background: var(--dye-soft); color: var(--dye); border-color: transparent; }
+.chip.cau { background: var(--warn-soft); color: var(--caustic); border-color: transparent; }
+.chip.cap { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.step-lead { margin: 0; max-width: 70ch; }
+.actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.action { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; align-content: start; }
+.action.main { border-color: var(--accent); background: var(--accent-soft); }
+.action .k { font-size: 12px; color: var(--muted); }
+.action .v { font: 600 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.action .v small { font: 500 12px var(--mono); color: var(--muted); margin-left: 3px; }
+.action .x { font: 12px var(--mono); color: var(--muted); }
+.step-foot { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.step-foot .num { color: var(--ink); }
+.or { align-self: center; justify-self: center; font: 600 12px var(--sans); letter-spacing: .08em; color: var(--muted); }
+
+/* Chart */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 18px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.chart-wrap { overflow-x: auto; }
+svg.chart { display: block; width: 100%; min-width: 520px; height: auto; font-family: var(--mono); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+/* Tables */
+.grid-2 { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 1180px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; min-width: 150px; }
+th { font: 600 11px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+td.num { font-size: 13px; }
+tr:last-child td { border-bottom: 0; }
+dl.kv { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; margin: 0; font-size: 14px; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--muted); margin: 0; max-width: 72ch; }
+.method { font-size: 14px; max-width: 75ch; }
+.method p { margin: 0 0 10px; }
+.method code { font-family: var(--mono); font-size: 13px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+footer { color: var(--muted); font-size: 12px; }
+@media (prefers-reduced-motion: no-preference) {
+  .kpi .v, .action .v { transition: color .2s; }
+}
+</style>
+<!-- page:end -->
+</head>
+<body>
+<!-- body:start -->
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Disperse dyes on PES · Sclavos Athena</div>
+      <h1>Aquachron <span>Wash-Off</span></h1>
+      <p>Enter the batch. You get the reduction-clearing bath, the Aquachron (AQC) water flow and time for each step, and the acid dose, in the order you run them.</p>
+    </div>
+    <div class="machine-tag" id="machineTags"></div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel" aria-label="Batch inputs">
+      <div class="panel-head">
+        <h2>Batch</h2>
+        <button class="btn" type="button" id="resetBtn">Reset to defaults</button>
+      </div>
+
+      <div class="field">
+        <span class="label">Chamber size</span>
+        <div class="seg" role="group" aria-label="Chamber size" id="chamberSeg">
+          <button type="button" data-v="250">Athena 250</button>
+          <button type="button" data-v="300">Athena 300</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="load">Fabric load <span class="hint">K</span></label>
+        <div class="input-unit"><input id="load" type="number" inputmode="decimal" min="1" step="1"><span class="unit">kg</span></div>
+      </div>
+
+      <div class="field">
+        <label for="shade">Shade depth <span class="hint">% o.w.f.</span></label>
+        <div class="shade-field">
+          <div class="shade-top">
+            <div class="swatch" id="swatch" aria-hidden="true"></div>
+            <div class="input-unit"><input id="shade" type="number" inputmode="decimal" min="0" step="0.05"><span class="unit">%</span></div>
+          </div>
+          <div class="slider">
+            <div class="zones" aria-hidden="true"><span class="z0"></span><span class="z1"></span><span class="z2"></span><span class="z3"></span></div>
+            <input id="shadeRange" type="range" min="0" max="1000" step="1" aria-label="Shade depth slider">
+            <div class="ticks" aria-hidden="true"><span style="left:0%">0</span><span style="left:20%">0.3</span><span style="left:50%">2</span><span style="left:75%">4</span><span style="left:100%">6 %</span></div>
+          </div>
+          <div class="band-line" id="bandLine"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label">Caustic soda strength <span class="hint">commercial product</span></span>
+        <div class="seg" role="group" aria-label="Caustic unit" id="causticSeg">
+          <button type="button" data-v="be">°Bé</button>
+          <button type="button" data-v="pct">% w/w NaOH</button>
+        </div>
+        <div class="input-unit" id="beWrap"><input id="causticBe" type="number" inputmode="decimal" step="0.5" aria-label="Caustic °Bé"><span class="unit">°Bé</span></div>
+        <div class="input-unit" id="pctWrap" hidden><input id="causticPct" type="number" inputmode="decimal" step="0.5" aria-label="Caustic % w/w"><span class="unit">% w/w</span></div>
+        <span class="hint" id="causticHint"></span>
+      </div>
+
+      <div id="advanced"></div>
+    </aside>
+
+    <main class="results" aria-live="polite">
+      <section class="summary" id="summary"></section>
+
+      <section style="display:grid;gap:12px">
+        <div class="section-head">
+          <h2>What to do</h2>
+          <p>Run the steps in order. Volumes are for the full bath.</p>
+        </div>
+        <ol class="steps" id="steps"></ol>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Bath profile</h2>
+          <p>Concentration in the bath through the AQC steps (log scale)</p>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="chart-wrap" id="chart"></div>
+      </section>
+
+      <section class="card" id="phCard"></section>
+      <section class="card" id="acidCard"></section>
+      <div class="grid-2">
+        <section class="card" id="balanceCard"></section>
+        <section class="card method">
+          <h2 style="font-size:22px">How it's calculated</h2>
+          <p>The bath is treated as perfectly mixed during each Aquachron step, with fresh water fed continuously. Feeding <code>W</code> litres through a bath of <code>VTL</code> litres lowers every dissolved substance by the same factor: <code>C = C₀ · e^(−W / VTL)</code>, so <code>W = VTL · ln(C₀ / C_end)</code>.</p>
+          <p>On the reduction-clearing path, the dye dilution is split between the two wash-offs in the same proportion as the caustic dilution. Each phase uses whichever needs more water, dye or caustic. Caustic then ends at or below its targets, and the pH and acid dose use that actual value.</p>
+          <p>If the flow needed is above the machine cap, the flow is held at the cap and the phase runs longer.</p>
+          <p>pH uses the temperature-dependent water constant pKw(T). The acid dose comes from a charge balance with the weak acid's dissociation at the target pH. The alkalinity factor covers carbonate, silicate and fibre-bound alkali; calibrate it by titrating a bath sample.</p>
+        </section>
+      </div>
+
+      <footer>Model and defaults from <span class="num">PES_Disperse_WashOff.xlsx</span> (corrected). Check doses against your own recipe before use.</footer>
+    </main>
+  </div>
+</div>
+
+<script src="calc.js"></script>
+<script>
+(function () {
+  "use strict";
+  var C = window.AquachronCalc;
+  var STORE = "aquachron-washoff-inputs-v1";
+  var state = Object.assign({}, C.DEFAULTS);
+  try { var saved = JSON.parse(localStorage.getItem(STORE) || "null"); if (saved) Object.assign(state, saved); } catch (e) {}
+
+  var ADV = [
+    { title: "Machine", hint: "liquor & flow", fields: [
+      ["carryLR", "Carry-over liquor ratio", "L/kg", 0.1],
+      ["flowCap", "Max AQC water flow", "L/min", 5]
+    ]},
+    { title: "Reduction clearing & AQC", hint: "RC path", fields: [
+      ["rcTemp", "RC & hot AQC temperature", "°C", 1, true],
+      ["causticConsumed", "Caustic consumed in RC", "%", 1],
+      ["wo1Time", "1st AQC time", "min", 0.5],
+      ["causticWo1", "Caustic after 1st AQC", "g/L", 0.05],
+      ["causticEnd", "Caustic final target", "g/L", 0.05],
+      ["coolFrom", "Cool from", "°C", 1],
+      ["coolTo", "Cool to", "°C", 1],
+      ["coolRate", "Cooling rate", "°C/min", 0.1]
+    ]},
+    { title: "AQC only", hint: "shade < 0.3 %", fields: [
+      ["rinseTime", "AQC time", "min", 0.5]
+    ]},
+    { title: "Dye", hint: "exhaustion & target", fields: [
+      ["dyeTarget", "Residual dye target", "g/L", 0.001, true],
+      ["lightBreak", "Light below", "%", 0.1],
+      ["fLight", "Fixed, light", "f", 0.01],
+      ["darkBreak", "Dark from", "%", 0.1],
+      ["fMedium", "Fixed, medium", "f", 0.01],
+      ["fDark", "Fixed, dark", "f", 0.01]
+    ]},
+    { title: "Neutralization", hint: "acid & pH", fields: [
+      ["targetPH", "Target pH", "pH", 0.1],
+      ["alkFactor", "Alkalinity factor", "×", 0.1],
+      ["aceticPurity", "Acetic acid strength", "%", 0.5],
+      ["formicPurity", "Formic acid strength", "%", 0.5],
+      ["refTemp", "pH-meter reference", "°C", 1]
+    ]}
+  ];
+
+  // ---------- formatting ----------
+  function fmt(x, d) { if (x === null || x === undefined || !isFinite(x)) return "–"; return x.toLocaleString("en-GB", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function sig(x) { if (!isFinite(x)) return "–"; if (x === 0) return "0"; var a = Math.abs(x); return fmt(x, a >= 100 ? 0 : a >= 10 ? 1 : a >= 1 ? 2 : a >= 0.1 ? 3 : 4); }
+  function mmss(min) { if (!isFinite(min)) return "–"; var s = Math.round(min * 60); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function act(k, v, unit, extra, cls) {
+    return '<div class="action' + (cls ? " " + cls : "") + '"><span class="k">' + k + '</span><span class="v">' + v + (unit ? "<small>" + unit + "</small>" : "") + "</span>" + (extra ? '<span class="x">' + extra + "</span>" : "") + "</div>";
+  }
+  function govChip(g) {
+    if (g === "dye") return '<span class="chip dye">dye sets the water</span>';
+    if (g === "caustic") return '<span class="chip cau">caustic sets the water</span>';
+    return '<span class="chip ok">no dilution needed</span>';
+  }
+
+  // ---------- build advanced inputs ----------
+  var adv = document.getElementById("advanced");
+  adv.innerHTML = ADV.map(function (g, gi) {
+    return '<details class="adv" id="adv' + gi + '"><summary>' + g.title + '<span class="hint">' + g.hint + '</span></summary><div class="adv-grid">' +
+      g.fields.map(function (f) {
+        return '<div class="field' + (f[4] ? " wide" : "") + '"><label for="' + f[0] + '">' + f[1] + '</label><div class="input-unit"><input id="' + f[0] + '" type="number" inputmode="decimal" step="' + f[3] + '"><span class="unit">' + f[2] + "</span></div></div>";
+      }).join("") + "</div></details>";
+  }).join("");
+
+  var numericIds = ["load", "shade", "causticBe", "causticPct"];
+  ADV.forEach(function (g) { g.fields.forEach(function (f) { numericIds.push(f[0]); }); });
+
+  function syncInputs() {
+    numericIds.forEach(function (id) { var el = document.getElementById(id); if (document.activeElement !== el) el.value = state[id]; });
+    setSlider(state.shade);
+    setSeg("chamberSeg", String(state.chamber));
+    setSeg("causticSeg", state.causticMode);
+    document.getElementById("beWrap").hidden = state.causticMode !== "be";
+    document.getElementById("pctWrap").hidden = state.causticMode !== "pct";
+  }
+  // Shade slider scale: each shade value sits at the same position as its tick label.
+  // More room goes to light shades; 0.3, 2 and 4 % (the dosing steps) land exactly on a slider stop.
+  var SHADE_KNOTS = [[0, 0], [0.3, 200], [2, 500], [4, 750], [6, 1000]];
+  function posFromShade(v) {
+    v = Math.max(0, Math.min(6, v));
+    for (var i = 1; i < SHADE_KNOTS.length; i++) {
+      var a = SHADE_KNOTS[i - 1], b = SHADE_KNOTS[i];
+      if (v <= b[0]) return Math.round(a[1] + (v - a[0]) / (b[0] - a[0]) * (b[1] - a[1]));
+    }
+    return 1000;
+  }
+  function shadeFromPos(x) {
+    for (var i = 1; i < SHADE_KNOTS.length; i++) {
+      var a = SHADE_KNOTS[i - 1], b = SHADE_KNOTS[i];
+      if (x <= b[1]) {
+        var v = a[0] + (x - a[1]) / (b[1] - a[1]) * (b[0] - a[0]);
+        return v < 2 ? Math.round(v * 100) / 100 : Math.round(v * 20) / 20;
+      }
+    }
+    return 6;
+  }
+  function setSlider(v) { document.getElementById("shadeRange").value = posFromShade(v); }
+  function setSeg(id, v) {
+    document.querySelectorAll("#" + id + " button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === v)); });
+  }
+
+  numericIds.forEach(function (id) {
+    document.getElementById(id).addEventListener("input", function (e) {
+      var v = parseFloat(e.target.value);
+      if (!isFinite(v)) return;
+      state[id] = v;
+      if (id === "shade") setSlider(v);
+      update();
+    });
+  });
+  document.getElementById("shadeRange").addEventListener("input", function (e) {
+    state.shade = shadeFromPos(Number(e.target.value));
+    document.getElementById("shade").value = state.shade;
+    update();
+  });
+  document.getElementById("chamberSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return; state.chamber = Number(b.dataset.v); syncInputs(); update();
+  });
+  document.getElementById("causticSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return; state.causticMode = b.dataset.v; syncInputs(); update();
+  });
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    state = Object.assign({}, C.DEFAULTS); syncInputs(); update();
+  });
+
+  // ---------- rendering ----------
+  function shadeColor(s) {
+    // Light blue-grey → deep navy as the shade deepens (disperse navy is the classic PES wash-off headache)
+    var t = Math.max(0, Math.min(1, Math.log10(1 + s * 3) / Math.log10(19)));
+    var a = [226, 232, 246], b = [18, 28, 78];
+    return "rgb(" + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(",") + ")";
+  }
+
+  function render(r) {
+    var p = r.inputs, V = r.machine.V, rc = r.path === "rc";
+
+    document.getElementById("machineTags").innerHTML =
+      '<span class="tag">Athena ' + p.chamber + '</span><span class="tag">Bath ' + fmt(V, 0) + ' L</span><span class="tag">LR 1:' + fmt(r.machine.LRa, 2) + '</span><span class="tag">Max ' + fmt(p.flowCap, 0) + ' L/min</span>';
+
+    document.getElementById("swatch").style.background = shadeColor(p.shade);
+    document.getElementById("bandLine").innerHTML = "<b>" + r.shadeBand + "</b> · " +
+      (rc ? "reduction clearing, then AQC" : "AQC only, no reduction clearing") + " · " + fmt(r.dye.fixed * 100, 0) + " % of the dye fixes";
+    document.getElementById("causticHint").textContent =
+      fmt(r.caustic.pct, 1) + " % NaOH · " + fmt(r.caustic.be, 1) + " °Bé · density " + fmt(r.caustic.density, 3) + " g/mL";
+
+    // Summary
+    var t = r.totals;
+    var warns = r.warnings.slice();
+    if (rc && r.wo1.capped) warns.push("The 1st AQC is limited by the " + fmt(p.flowCap, 0) + " L/min flow cap, so it runs " + mmss(r.wo1.time) + " instead of " + mmss(r.wo1.plannedTime) + ".");
+    if (rc && r.wo2.capped) warns.push("The 2nd AQC is limited by the flow cap.");
+    if (!rc && r.rinse.capped) warns.push("The AQC is limited by the " + fmt(p.flowCap, 0) + " L/min flow cap, so it runs " + mmss(r.rinse.time) + ".");
+    document.getElementById("summary").innerHTML =
+      '<div class="summary-head"><span class="pill ' + (rc ? "rc" : "rinse") + '">' + (rc ? "RC + AQC" : "AQC only") + '</span><span class="desc">' +
+      fmt(p.shade, 2) + " % shade on " + fmt(p.load, 0) + " kg · " + fmt(r.dye.applied, 2) + " kg dye applied, " + fmt(r.dye.applied * r.dye.unfixed, 3) + " kg to wash off</span></div>" +
+      '<div class="kpis">' +
+        '<div class="kpi"><span class="eyebrow">AQC time</span><span class="v">' + mmss(t.time) + "<small>min</small></span><span class=\"s\">" + (rc ? "1st + 2nd AQC" : "single AQC") + "</span></div>" +
+        '<div class="kpi"><span class="eyebrow">Water</span><span class="v">' + fmt(t.water, 0) + "<small>L</small></span><span class=\"s\">AQC total</span></div>" +
+        '<div class="kpi"><span class="eyebrow">Water / kg</span><span class="v">' + fmt(t.waterPerKg, 1) + "<small>L/kg</small></span><span class=\"s\">fabric</span></div>" +
+        '<div class="kpi"><span class="eyebrow">Residual dye</span><span class="v">' + sig(t.dyeFinal) + "<small>g/L</small></span><span class=\"s\">target " + sig(p.dyeTarget) + " g/L</span></div>" +
+      "</div>" +
+      (warns.length ? '<div class="warns">' + warns.map(function (w) { return '<div class="warn">' + esc(w) + "</div>"; }).join("") + "</div>" : "");
+
+    // Steps
+    var steps = [];
+    if (rc) {
+      var b = r.rcBath, w1 = r.wo1, w2 = r.wo2, acids = r.neutral.acids;
+      steps.push({ title: "Reduction Clearing", chips: ['<span class="chip heat">' + fmt(p.rcTemp, 0) + " °C</span>", '<span class="chip">' + fmt(V, 0) + " L bath</span>"],
+        lead: "Add to the full bath, then run reduction clearing at " + fmt(p.rcTemp, 0) + " °C for your recipe time.",
+        actions: act("Caustic soda (" + (p.causticMode === "be" ? fmt(p.causticBe, 0) + " °Bé" : fmt(p.causticPct, 1) + " %") + ")", fmt(b.causticL, 2), "L", fmt(b.causticKg, 2) + " kg · " + fmt(b.causticDose, 2) + " g/L", "main") +
+                 act("Sodium hydrosulphite", fmt(b.hydrosKg, 2), "kg", fmt(b.hydrosDose, 1) + " g/L solid", "main"),
+        foot: ["Actual NaOH in bath <span class=\"num\">" + fmt(b.causticNaOH, 3) + " g/L</span>", "Caustic left after RC <span class=\"num\">" + fmt(w1.causticStart, 2) + " g/L</span> (" + fmt(p.causticConsumed, 0) + " % consumed)"] });
+      steps.push({ title: "1st AQC at " + fmt(p.rcTemp, 0) + " °C", chips: ['<span class="chip heat">hold ' + fmt(p.rcTemp, 0) + " °C</span>", govChip(w1.governs)].concat(w1.capped ? ['<span class="chip cap">flow capped</span>'] : []),
+        lead: w1.need > 0 ? "Run Aquachron at " + fmt(p.rcTemp, 0) + " °C with fresh water at this flow." : "Caustic and dye are already low enough; hold for the planned time.",
+        actions: act("AQC water flow", fmt(w1.flow, 0), "L/min", "", "main") + act("Time", mmss(w1.time), "min", "", "main") + act("Water", fmt(w1.water, 0), "L", fmt(w1.water / p.load, 1) + " L/kg"),
+        foot: ["Dye <span class=\"num\">" + sig(w1.dyeStart) + " → " + sig(w1.dyeEnd) + " g/L</span>", "Caustic <span class=\"num\">" + sig(w1.causticStart) + " → " + sig(w1.causticEnd) + " g/L</span>"] });
+      steps.push({ title: "2nd AQC " + fmt(p.coolFrom, 0) + "–" + fmt(p.coolTo, 0) + " °C", chips: ['<span class="chip heat">' + fmt(p.coolFrom, 0) + " → " + fmt(p.coolTo, 0) + " °C at " + fmt(p.coolRate, 1) + " °C/min</span>", govChip(w2.governs)].concat(w2.capped ? ['<span class="chip cap">flow capped</span>'] : []),
+        lead: "Start the cooling ramp and run Aquachron during cooling." + (w2.time > r.coolTime + 1e-9 ? " Keep running Aquachron at " + fmt(p.coolTo, 0) + " °C after the ramp ends, until the time is up." : ""),
+        actions: act("AQC water flow", fmt(w2.flow, 0), "L/min", "", "main") + act("Time", mmss(w2.time), "min", "", "main") + act("Water", fmt(w2.water, 0), "L", fmt(w2.water / p.load, 1) + " L/kg"),
+        foot: ["Dye <span class=\"num\">" + sig(w2.dyeStart) + " → " + sig(w2.dyeEnd) + " g/L</span>", "Caustic <span class=\"num\">" + sig(w2.causticStart) + " → " + sig(w2.causticEnd) + " g/L</span>", "pH at 25 °C <span class=\"num\">≈ " + fmt(r.ph[2].pH25, 1) + "</span>"] });
+      steps.push({ title: "Neutralization to pH " + fmt(p.targetPH, 1), chips: ['<span class="chip heat">' + fmt(p.coolTo, 0) + " °C</span>", '<span class="chip">use one acid</span>'],
+        lead: "Dose one of these acids into the bath, circulate, then check the pH.",
+        actions: act(acids[0].name + " " + fmt(acids[0].purity, 1) + " %", fmt(acids[0].suppliedKg, 3), "kg", fmt(acids[0].suppliedGL, 3) + " g/L as supplied", "main") +
+                 '<span class="or">OR</span>' +
+                 act(acids[1].name + " " + fmt(acids[1].purity, 1) + " %", fmt(acids[1].suppliedKg, 3), "kg", fmt(acids[1].suppliedGL, 3) + " g/L as supplied", "main"),
+        foot: ["Residual NaOH <span class=\"num\">" + fmt(r.neutral.naoh, 4) + " g/L</span>", "Alkalinity ×" + fmt(p.alkFactor, 1) + " <span class=\"num\">" + fmt(r.neutral.alk, 4) + " g/L as NaOH</span>"] });
+    } else {
+      var rn = r.rinse;
+      if (rn.notNeeded) {
+        steps.push({ title: "No AQC needed", chips: ['<span class="chip ok">dye already below target</span>'],
+          lead: "Unfixed dye in the bath (" + sig(rn.dyeStart) + " g/L) is already at or below the " + sig(p.dyeTarget) + " g/L target. Drain and continue.",
+          actions: "", foot: [] });
+      } else {
+        steps.push({ title: "AQC at " + fmt(p.rcTemp, 0) + " °C", chips: ['<span class="chip heat">' + fmt(p.rcTemp, 0) + " °C</span>", '<span class="chip dye">dye sets the water</span>'].concat(rn.capped ? ['<span class="chip cap">flow capped</span>'] : []),
+          lead: "Light shade: no reduction clearing. Remove the unfixed dye with Aquachron at " + fmt(p.rcTemp, 0) + " °C.",
+          actions: act("AQC water flow", fmt(rn.flow, 0), "L/min", "", "main") + act("Time", mmss(rn.time), "min", "", "main") + act("Water", fmt(rn.water, 0), "L", fmt(rn.water / p.load, 1) + " L/kg"),
+          foot: ["Dye <span class=\"num\">" + sig(rn.dyeStart) + " → " + sig(rn.dyeEnd) + " g/L</span>"] });
+      }
+    }
+    document.getElementById("steps").innerHTML = steps.map(function (s, i) {
+      return '<li class="step"><div class="step-no" aria-hidden="true">' + (i + 1) + '</div><div class="step-body"><div class="step-title"><h3>' + s.title + "</h3>" + s.chips.join("") + "</div>" +
+        '<p class="step-lead">' + s.lead + "</p>" + (s.actions ? '<div class="actions">' + s.actions + "</div>" : "") +
+        (s.foot.length ? '<div class="step-foot">' + s.foot.map(function (f) { return "<span>" + f + "</span>"; }).join("") + "</div>" : "") + "</div></li>";
+    }).join("");
+
+    renderChart(r);
+    renderTables(r);
+  }
+
+  function renderChart(r) {
+    var rc = r.path === "rc", p = r.inputs;
+    var phases = rc ? [
+      { name: "1st AQC", t0: 0, t1: r.wo1.time, temp: fmt(p.rcTemp, 0) + " °C", dye: [r.wo1.dyeStart, r.wo1.dyeEnd], cau: [r.wo1.causticStart, r.wo1.causticEnd] },
+      { name: "2nd AQC", t0: r.wo1.time, t1: r.wo1.time + r.wo2.time, temp: fmt(p.coolFrom, 0) + "→" + fmt(p.coolTo, 0) + " °C", dye: [r.wo2.dyeStart, r.wo2.dyeEnd], cau: [r.wo2.causticStart, r.wo2.causticEnd] }
+    ] : [
+      { name: "AQC", t0: 0, t1: r.rinse.time, temp: fmt(p.rcTemp, 0) + " °C", dye: [r.rinse.dyeStart, r.rinse.dyeEnd] }
+    ];
+    var T = phases[phases.length - 1].t1;
+    var legend = '<span><i style="background:var(--dye)"></i>Dye (g/L)</span>' + (rc ? '<span><i style="background:var(--caustic)"></i>Caustic, commercial (g/L)</span>' : "") + '<span><i style="background:var(--muted);height:1px"></i>Targets</span>';
+    document.getElementById("legend").innerHTML = legend;
+    if (!(T > 0) || !(r.dye.C0 > 0)) { document.getElementById("chart").innerHTML = '<p class="note">No wash-off to plot for this batch.</p>'; return; }
+
+    var vals = [p.dyeTarget];
+    phases.forEach(function (ph) { vals = vals.concat(ph.dye, ph.cau || []); });
+    if (rc) vals.push(p.causticEnd);
+    vals = vals.filter(function (v) { return v > 0; });
+    var lo = Math.floor(Math.log10(Math.min.apply(null, vals))), hi = Math.ceil(Math.log10(Math.max.apply(null, vals)));
+    if (hi === lo) hi++;
+
+    var W = 720, H = 300, m = { l: 58, r: 20, t: 30, b: 40 };
+    var iw = W - m.l - m.r, ih = H - m.t - m.b;
+    var x = function (t) { return m.l + (t / T) * iw; };
+    var y = function (v) { return m.t + (1 - (Math.log10(v) - lo) / (hi - lo)) * ih; };
+    var s = '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Dye and caustic concentration over AQC time">';
+    phases.forEach(function (ph, i) {
+      s += '<rect x="' + x(ph.t0) + '" y="' + m.t + '" width="' + (x(ph.t1) - x(ph.t0)) + '" height="' + ih + '" fill="' + (i % 2 ? "var(--surface-2)" : "var(--heat-soft)") + '" opacity="' + (i % 2 ? 1 : 0.45) + '"/>';
+      s += '<text x="' + (x(ph.t0) + 8) + '" y="' + (m.t - 10) + '" font-size="12" fill="var(--ink)" font-weight="600">' + ph.name + ' <tspan fill="var(--heat)" font-weight="400">' + ph.temp + "</tspan></text>";
+    });
+    for (var e = lo; e <= hi; e++) {
+      var v = Math.pow(10, e), yy = y(v);
+      s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="var(--line)" stroke-width="1"/>';
+      s += '<text x="' + (m.l - 8) + '" y="' + (yy + 4) + '" font-size="11" text-anchor="end" fill="var(--muted)">' + (e >= 0 ? fmt(v, 0) : v.toFixed(-e)) + "</text>";
+    }
+    var step = T <= 12 ? 2 : T <= 30 ? 5 : 10;
+    for (var tt = 0; tt <= T + 1e-9; tt += step) {
+      s += '<text x="' + x(tt) + '" y="' + (H - m.b + 18) + '" font-size="11" text-anchor="middle" fill="var(--muted)">' + tt + "</text>";
+    }
+    s += '<text x="' + (W - m.r) + '" y="' + (H - 6) + '" font-size="11" text-anchor="end" fill="var(--muted)">min</text>';
+    s += '<text x="' + (m.l - 8) + '" y="' + (m.t - 10) + '" font-size="11" text-anchor="end" fill="var(--muted)">g/L</text>';
+    function target(v, label, color) {
+      var yy = y(v);
+      s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + yy + '" y2="' + yy + '" stroke="' + color + '" stroke-dasharray="4 4" stroke-width="1" opacity=".8"/>';
+      s += '<text x="' + (W - m.r - 4) + '" y="' + (yy - 5) + '" font-size="11" text-anchor="end" fill="' + color + '">' + label + "</text>";
+    }
+    target(p.dyeTarget, "dye target " + sig(p.dyeTarget), "var(--dye)");
+    if (rc) target(p.causticEnd, "caustic target " + sig(p.causticEnd), "var(--caustic)");
+    function series(key, color) {
+      var pts = [];
+      phases.forEach(function (ph) { if (ph[key]) { pts.push([x(ph.t0), y(Math.max(ph[key][0], Math.pow(10, lo)))], [x(ph.t1), y(Math.max(ph[key][1], Math.pow(10, lo)))]); } });
+      if (!pts.length) return;
+      s += '<polyline fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" points="' + pts.map(function (q) { return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '"/>';
+      var last = pts[pts.length - 1];
+      s += '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="4" fill="' + color + '" stroke="var(--surface)" stroke-width="2"/>';
+    }
+    if (rc) series("cau", "var(--caustic)");
+    series("dye", "var(--dye)");
+    s += '<line x1="' + m.l + '" x2="' + m.l + '" y1="' + m.t + '" y2="' + (m.t + ih) + '" stroke="var(--muted)" stroke-width="1"/>';
+    s += "</svg>";
+    document.getElementById("chart").innerHTML = s;
+  }
+
+  function renderTables(r) {
+    var rc = r.path === "rc", p = r.inputs;
+    var phCard = document.getElementById("phCard"), acidCard = document.getElementById("acidCard");
+    if (rc) {
+      phCard.innerHTML = '<h2 style="font-size:22px">pH through the AQC steps</h2><div class="tbl-wrap"><table><thead><tr><th>Stage</th><th>Caustic g/L</th><th>NaOH g/L</th><th>°C</th><th>pH @ °C</th><th>pH @ ' + fmt(p.refTemp, 0) + " °C</th></tr></thead><tbody>" +
+        r.ph.map(function (s) { return "<tr><td>" + s.stage + '</td><td class="num">' + sig(s.caustic) + '</td><td class="num">' + sig(s.naoh) + '</td><td class="num">' + fmt(s.temp, 0) + '</td><td class="num">' + fmt(s.pHprocess, 2) + '</td><td class="num">' + fmt(s.pH25, 2) + "</td></tr>"; }).join("") +
+        '</tbody></table></div><p class="note">Uses the caustic actually left in the bath. A meter reads closest to the ' + fmt(p.refTemp, 0) + " °C column on a cooled sample.</p>";
+      acidCard.innerHTML = '<h2 style="font-size:22px">Acid options to pH ' + fmt(p.targetPH, 1) + '</h2><div class="tbl-wrap"><table><thead><tr><th>Acid</th><th>pKa</th><th>mmol/L</th><th>Pure g/L</th><th>As supplied g/L</th><th>As supplied kg</th></tr></thead><tbody>' +
+        r.neutral.acids.map(function (a) { return "<tr><td>" + a.name + " <span class=\"note\">" + a.formula + " · " + fmt(a.purity, 1) + ' %</span></td><td class="num">' + fmt(a.pKa, 2) + '</td><td class="num">' + fmt(a.mol * 1000, 3) + '</td><td class="num">' + fmt(a.pureGL, 4) + '</td><td class="num">' + fmt(a.suppliedGL, 4) + '</td><td class="num">' + fmt(a.suppliedKg, 3) + "</td></tr>"; }).join("") +
+        '</tbody></table></div><p class="note">Alkalinity to neutralize: ' + fmt(r.neutral.naoh, 4) + " g/L NaOH × factor " + fmt(p.alkFactor, 1) + " = " + fmt(r.neutral.Cb * 1000, 3) + " mmol/L.</p>";
+    } else {
+      phCard.innerHTML = '<h2 style="font-size:22px">pH through the AQC steps</h2><p class="note">No caustic is used on the AQC-only path, so there is no alkalinity to track.</p>';
+      acidCard.innerHTML = '<h2 style="font-size:22px">Neutralization</h2><p class="note">Not needed on the AQC-only path.</p>';
+    }
+    var m = r.machine, d = r.dye;
+    document.getElementById("balanceCard").innerHTML = '<h2 style="font-size:22px">Bath &amp; dye balance</h2><dl class="kv">' +
+      "<dt>Dead volume</dt><dd>" + fmt(m.deadVol, 0) + " L</dd>" +
+      "<dt>Carry-over (K × " + fmt(p.carryLR, 1) + " L/kg)</dt><dd>" + fmt(m.carryVol, 0) + " L</dd>" +
+      "<dt>Total liquor VTL</dt><dd>" + fmt(m.V, 0) + " L</dd>" +
+      "<dt>Dye applied</dt><dd>" + fmt(d.applied, 3) + " kg</dd>" +
+      "<dt>Fixed on fibre (f)</dt><dd>" + fmt(d.fixed, 2) + "</dd>" +
+      "<dt>Unfixed dye in bath C₀</dt><dd>" + sig(d.C0) + " g/L</dd>" +
+      "<dt>Dye target</dt><dd>" + sig(d.target) + " g/L</dd>" +
+      (rc ? "<dt>RC dose, caustic / hydros</dt><dd>" + fmt(r.rcBath.causticDose, 2) + " / " + fmt(r.rcBath.hydrosDose, 1) + " g/L</dd>" : "") +
+      "</dl>";
+  }
+
+  function update() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+    render(C.compute(state));
+  }
+
+  syncInputs();
+  update();
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}
+</script>
+<!-- body:end -->
+</body>
+</html>

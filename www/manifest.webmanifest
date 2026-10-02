@@ -1,0 +1,16 @@
+{
+  "name": "Aquachron Wash-Off Calculator",
+  "short_name": "AQC Calc",
+  "description": "Disperse-dye wash-off calculator for PES in Sclavos Athena machines with Aquachron.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ECF0F2",
+  "theme_color": "#0A6A74",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
